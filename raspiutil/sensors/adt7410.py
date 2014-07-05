@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-u"""Module for ADT7410 connected to I2C bus
+"""Module for ADT7410 connected to I2C bus
 
 Raspberry Pi の BCM2708 では, ADT7410 から1バイトずつ
 読み出すことが出来ない問題があるが, 先頭4バイトだけは
@@ -8,10 +8,13 @@ Raspberry Pi の BCM2708 では, ADT7410 から1バイトずつ
 している.
 """
 
+from __future__ import division, unicode_literals
+
 import smbus
 
+
 class ADT7410(object):
-    u"""Class for ADT7410 connected to I2C bus
+    """Class for ADT7410 connected to I2C bus
 
     :param bus: I2C bus number
     :param address: Device address of ADT7410
@@ -23,7 +26,7 @@ class ADT7410(object):
 
     @property
     def resolution(self):
-        u"""Resolution of the ADC
+        """Resolution of the ADC
 
         0 = 13-bit resolution. Resolution of 0.0625 deg C
         1 = 16-bit resolution. Resolution of 0.0078 deg C
@@ -36,18 +39,18 @@ class ADT7410(object):
 
     @property
     def temperature(self):
-        u"""Temperature in degrees (Celsius)"""
+        """Temperature in degrees (Celsius)"""
         self._get_data()
         if self.resolution == 0:
             temp = (self._temp_msb << 8 | self._temp_lsb) >> 3
             if temp >= 0x1000:
                 temp -= 0x2000;
-            return temp / 16.0
+            return temp / 16
         else:
             temp = self._temp_msb << 8 | self._temp_lsb
             if temp >= 0x8000:
                 temp -= 0x10000;
-            return temp / 128.0
+            return temp / 128
 
     def _get_bit(self, data, bit):
         return data >> bit & 1
@@ -62,7 +65,7 @@ class ADT7410(object):
             return data
 
     def _get_data(self):
-        u"""Get data from ADT7410"""
+        """Get data from ADT7410"""
         data = map(int, self._bus.read_i2c_block_data(self._address, 0x00, 4))
         self._temp_msb = data[0x00]
         self._temp_lsb = data[0x01]
@@ -70,6 +73,6 @@ class ADT7410(object):
         self._config = data[0x03]
 
     def _set_config(self, value):
-        u"""Set configuration bits"""
+        """Set configuration bits"""
         self._bus.write_byte_data(self._address, 0x03, value)
         self._get_data()
