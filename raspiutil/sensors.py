@@ -1,12 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Module for ADT7410 connected to I2C bus
-
-Raspberry Pi の BCM2708 では, ADT7410 から1バイトずつ
-読み出すことが出来ない問題があるが, 先頭4バイトだけは
-まとめて読みだすことが出来るため, それを使った実装と
-している.
-"""
+"""Module for some sensors"""
 
 from __future__ import division, unicode_literals
 
