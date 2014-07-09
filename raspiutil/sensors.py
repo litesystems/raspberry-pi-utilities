@@ -71,3 +71,52 @@ class ADT7410(object):
         """Set configuration bits"""
         self._bus.write_byte_data(self._address, 0x03, value)
         self._get_data()
+
+
+class LPS331(object):
+    """Class for LPS331 connected to I2C bus
+
+    :param bus: I2C bus number
+    :param address: Device address of LPS331
+    """
+    def __init__(self, bus, address=0x5d):
+        self._bus = smbus.SMBus(bus)
+        self._address = address
+        self.who_am_i()
+
+    def who_am_i(self):
+        data = int(self._bus.read_byte_data(self._address, 0x0f))
+        if data != 0xbb:
+            self.close()
+            raise Exception("Device error")
+
+    def open(self):
+        # Activate
+        self._bus.write_byte_data(self._address, 0x20, 0x90);
+
+    def close(self):
+        # Close
+        self._bus.write_byte_data(self._address, 0x20, 0x00);
+
+    @property
+    def pressure(self):
+        """Pressure in hPa"""
+        pressure_xl = self._bus.read_byte_data(self._address, 0x28)
+        pressure_l = self._bus.read_byte_data(self._address, 0x29)
+        pressure_h = self._bus.read_byte_data(self._address, 0x2a)
+        counts = (pressure_h << 16) | (pressure_l << 8) | pressure_h
+        if counts & 0x800000 == 0x800000:
+            counts = -((counts ^ 0xffffff) + 0x1)
+        hpa = counts / 4096
+        return hpa
+
+    @property
+    def temperature(self):
+        """Temperature in degrees (Celsius)"""
+        temp_h = self._bus.read_byte_data(self._address, 0x2c)
+        temp_l = self._bus.read_byte_data(self._address, 0x2b)
+        counts = (temp_h << 8) | temp_l
+        if counts & 0x8000 == 0x8000:
+            counts = -((counts ^ 0xffff) + 0x1)
+        temp = 42.5 + (counts / 480)
+        return temp
