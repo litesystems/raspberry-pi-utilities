@@ -98,10 +98,11 @@ class LPS331(object):
         # Close
         self._bus.write_byte_data(self._address, 0x20, 0x00);
 
-    @property
-    def pressure(self):
-        """Pressure in hPa"""
+    def _read(self):
+        # Request one shot
         self._bus.write_byte_data(self._address, 0x21, 0x01)
+
+        # Wait pressure
         while True:
             status = self._bus.read_byte_data(self._address, 0x27)
             if status & 0x02:
@@ -113,12 +114,8 @@ class LPS331(object):
         if counts & 0x800000 == 0x800000:
             counts = -((counts ^ 0xffffff) + 0x1)
         hpa = counts / 4096
-        return hpa
 
-    @property
-    def temperature(self):
-        """Temperature in degrees (Celsius)"""
-        self._bus.write_byte_data(self._address, 0x21, 0x01)
+        # Wait temperature
         while True:
             status = self._bus.read_byte_data(self._address, 0x27)
             if status & 0x01:
@@ -129,4 +126,14 @@ class LPS331(object):
         if counts & 0x8000 == 0x8000:
             counts = -((counts ^ 0xffff) + 0x1)
         temp = 42.5 + (counts / 480)
-        return temp
+        return (hpa, temp,)
+
+    @property
+    def pressure(self):
+        """Pressure in hPa"""
+        return self._read()[0]
+
+    @property
+    def temperature(self):
+        """Temperature in degrees (Celsius)"""
+        return self._read()[1]
