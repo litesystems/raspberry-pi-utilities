@@ -104,7 +104,7 @@ class LPS331(object):
         pressure_xl = self._bus.read_byte_data(self._address, 0x28)
         pressure_l = self._bus.read_byte_data(self._address, 0x29)
         pressure_h = self._bus.read_byte_data(self._address, 0x2a)
-        counts = (pressure_h << 16) | (pressure_l << 8) | pressure_xl
+        counts = ((pressure_h << 16) | (pressure_l << 8) | pressure_xl)
         if counts & 0x800000 == 0x800000:
             counts = -((counts ^ 0xffffff) + 0x1)
         hpa = counts / 4096
