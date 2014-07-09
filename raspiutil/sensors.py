@@ -71,3 +71,27 @@ class ADT7410(object):
         """Set configuration bits"""
         self._bus.write_byte_data(self._address, 0x03, value)
         self._get_data()
+
+
+class LPS331(object):
+    """Class for LPS331 connected to I2C bus
+
+    :param bus: I2C bus number
+    :param address: Device address of LPS331
+    """
+    def __init__(self, bus, address=0x5d):
+        self._bus = smbus.SMBus(bus)
+        self._address = address
+        self.who_am_i()
+
+    def who_am_i(self):
+        data = int(self._bus.read_byte_data(self._address, 0x0f))
+        if data != 0xbb:
+            self.close()
+            raise Exception("Device error")
+
+    def open(self):
+        pass
+
+    def close(self):
+        pass
