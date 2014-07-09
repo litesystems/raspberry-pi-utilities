@@ -91,7 +91,32 @@ class LPS331(object):
             raise Exception("Device error")
 
     def open(self):
-        pass
+        # Activate
+        self._bus.write_byte_data(self._address, 0x20, 0x90);
 
     def close(self):
-        pass
+        # Close
+        self._bus.write_byte_data(self._address, 0x20, 0x00);
+
+    @property
+    def pressure(self):
+        """Pressure in hPa"""
+        pressure_xl = self._bus.read_byte_data(self._address, 0x28)
+        pressure_l = self._bus.read_byte_data(self._address, 0x29)
+        pressure_h = self._bus.read_byte_data(self._address, 0x2a)
+        counts = (pressure_h << 16) | (pressure_l << 8) | pressure_h
+        if counts & 0x800000 == 0x800000:
+            counts = -((counts ^ 0xffffff) + 0x1)
+        hpa = counts / 4096
+        return hpa
+
+    @property
+    def temperature(self):
+        """Temperature in degrees (Celsius)"""
+        temp_h = self._bus.read_byte_data(self._address, 0x2c)
+        temp_l = self._bus.read_byte_data(self._address, 0x2b)
+        counts = (temp_h << 8) | temp_l
+        if counts & 0x8000 == 0x8000:
+            counts = -((counts ^ 0xffff) + 0x1)
+        temp = 42.5 + (counts / 480)
+        return temp
