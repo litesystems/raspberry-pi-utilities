@@ -7,7 +7,7 @@ except:
 
 
 setup(name='raspberry-pi-utilities',
-      version='0.1',
+      version='0.2',
       description='Raspberry Pi utilities',
       author='Yusuke Miyazaki',
       author_email='miyazaki.dev@gmail.com',
