@@ -10,7 +10,7 @@ ext_modules = [
 ]
 
 setup(name='raspberry-pi-utilities',
-      version='0.2.1',
+      version='0.3.0',
       description='Raspberry Pi utilities',
       author='Yusuke Miyazaki',
       author_email='miyazaki.dev@gmail.com',
