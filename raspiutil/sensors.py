@@ -7,6 +7,11 @@ from __future__ import division, unicode_literals
 
 import smbus
 
+try:
+    from craspiutil import dht11_get_data
+except:
+    pass
+
 
 class ADT7410(object):
     """Class for ADT7410 connected to I2C bus
@@ -137,3 +142,35 @@ class LPS331(object):
     def temperature(self):
         """Temperature in degrees (Celsius)"""
         return self._read()[1]
+
+
+class DHT11(object):
+    """Class for DHT11 connected to GPIO
+
+    :param pin: WiringPi pin number (http://wiringpi.com/pins/)
+    """
+    def __init__(self, pin):
+        self._pin = pin
+
+    def _read(self, retry=5):
+        for _ in range(retry):
+            result = dht11_get_data(self._pin)
+            if result > 0:
+                return result
+        return None
+
+    @property
+    def humidity(self):
+        """Humidity in percent"""
+        result = self._read()
+        high = (result & 0xff000000) >> 24
+        low = (result & 0x00ff0000) >> 16
+        return high + low * 0.01
+
+    @property
+    def temperature(self):
+        """Temperature in degrees (Celsius)"""
+        result = self._read()
+        high = (result & 0x0000ff00) >> 8
+        low = result & 0x000000ff
+        return high + low * 0.01
